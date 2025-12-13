@@ -1,21 +1,21 @@
 pipeline {
-  agent any
+  agent {
+    docker {
+      image 'maven:3.9.9-eclipse-temurin-17'
+      args '-v $HOME/.m2:/root/.m2'
+    }
+  }
 
   environment {
     NEXUS_URL  = "http://127.0.0.1:52116"
     NEXUS_REPO = "maven-releases"
-    CREDS_ID  = "nexus-admin"
+    CREDS_ID   = "nexus-admin"
   }
 
   stages {
-    stage('Checkout') {
-      steps {
-        checkout scm
-      }
-    }
-
     stage('Build with Maven') {
       steps {
+        sh 'mvn -v'
         sh 'mvn clean package -DskipTests'
         sh 'ls -la target'
       }
@@ -27,8 +27,8 @@ pipeline {
           sh '''
             JAR=$(ls target/*.jar | head -n 1)
             echo "Uploading $JAR"
-            curl -u $NEXUS_USER:$NEXUS_PASS --upload-file $JAR \
-            $NEXUS_URL/repository/$NEXUS_REPO/$(basename $JAR)
+            curl -v -u "$NEXUS_USER:$NEXUS_PASS" --upload-file "$JAR" \
+              "$NEXUS_URL/repository/$NEXUS_REPO/$(basename $JAR)"
           '''
         }
       }
