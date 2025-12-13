@@ -1,13 +1,8 @@
 pipeline {
-  agent {
-    docker {
-      image 'maven:3.9.9-eclipse-temurin-17'
-      args '-v $HOME/.m2:/root/.m2'
-    }
-  }
+  agent any
 
   environment {
-    NEXUS_URL  = "http://127.0.0.1:52116"
+    NEXUS_URL  = "http://nexus-svc:8081"
     NEXUS_REPO = "maven-releases"
     CREDS_ID   = "nexus-admin"
   }
